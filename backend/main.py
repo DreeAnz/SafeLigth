@@ -4,11 +4,27 @@ from fastapi import FastAPI, Depends                    #framework
 from sqlalchemy.orm import Session                      #tipos de sesion
 import models, schemas, crud
 from database import engine, SessionLocal, Base        #importamos conexion,sesion,base
+from fastapi.middleware.cors import CORSMiddleware      #importamos  CORS de fastapi para evitar errores
 
 Base.metadata.create_all(bind=engine)                   #crear tabla automaticamente
 
 #crear la api
 app = FastAPI()
+
+# le comunicamos a la ruta de back que esta bien que la ruta del front nos haga peticiones
+origins = [
+    "http://localhost:5500",    #ruta del frontend (ambas lo son)
+    "http://127.0.0.1:5500"     
+]
+
+#importante para que no aparezcan errores al intercambiar la informacion
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #crea una condicion cada que alguien hace una peticion
 def get_db():

@@ -25,15 +25,19 @@ def obtenter_luminarias(db:Session):
 
 
 #reportar una luminaria creada, con su id
-def reportar_luminarias(db:Session, luminaria_id:int):
+def reportar_luminarias(db:Session, luminaria_id:int): #luminaria_id es la id que pone el usuario
+
+    #consulta SELECT id FROM luminarias WHERE id=luminaria_id
     luminaria = db.query(models.Luminaria).filter(models.Luminaria.id==luminaria_id).first()
 
+    #si no hay luminaria
     if not luminaria:
         return{"Error": "Luminaria no encontrada"}
 
+    #se le añede un reporte
     luminaria.reportes += 1
-    db.commit()
-    db.refresh(luminaria)
+    db.commit()                 #se guarda en la BD
+    db.refresh(luminaria)       #actualiza 
     
     return luminaria
 
@@ -43,7 +47,6 @@ def obtener_zonas_riesgo(db: Session):
             #       consulta-  tabla-       todo
     luminarias = db.query(models.Luminaria).all()
 
-    #zonas 0
     zonas = {}
 
     #verifica si existe alguna zona ya esta registrada
@@ -113,14 +116,19 @@ def generar_alertas(db:Session):
     return alertas
 
 
-#posibles fallas
+#posibles fallas | tratamos de identificar que luminarias pueden fallar antes de que fallen
 def predecir_fallas(db: Session):
+    #realizamos consulta Select * from Luminaria
     luminarias = db.query(models.Luminaria).all()
 
     predicciones = []
 
+# recorre las luminarias encontradas
     for i in luminarias:
+        #si el estado es ok y tiene mas de 1 reporte o su antiguedad es mayor a 4
         if i.estado == "ok" and (i.reportes >= 1 or i.antiguedad >= 4):
+
+            #respuesta al usuario
             predicciones.append({
                 "id": i.id,
                 "zona": i.zona,
