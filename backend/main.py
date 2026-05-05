@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends                    #framework
 from sqlalchemy.orm import Session                      #tipos de sesion
 import models, schemas, crud
 from database import engine, SessionLocal, Base        #importamos conexion,sesion,base
-from fastapi.middleware.cors import CORSMiddleware      #importamos  CORS de fastapi para evitar errores
+from fastapi.middleware.cors import CORSMiddleware      #importamos  CORS de fastapi para la comunicacion entre front y back
 
 Base.metadata.create_all(bind=engine)                   #crear tabla automaticamente
 

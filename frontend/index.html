@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>SafeLigth</title>
-        <link rel="stylesheet" href="styles.css">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-    </head>
-    <body>
-        
+<head>
+    <meta charset="UTF-8">
+    <title>SafeLigth</title>
 
-        <h1>SafeLigth | Monitoreo de alumbrado</h1>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
+    <div class="container">
+
+        <!-- panel izquierdo -->
+        <div class="sidebar">
+            <h1>SafeLigth</h1>
+
+            <div class="card">
+                <h3>Estadísticas</h3>
+                <p id="total">Total: 0</p>
+                <p id="zonas">Zonas críticas: 0</p>
+            </div>
+
+            <div class="card">
+                <h3>Alertas</h3>
+                <ul id="alertas"></ul>
+            </div>
+
+            <div class="card">
+                <h3>Luminarias</h3>
+                <ul id="lista-luminarias"></ul>
+            </div>
+
+        </div>
+
+        <!-- mapa -->
         <div id="map"></div>
-        <h2>Alertas</h2>
-        <ul id="alertas"></ul>
 
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-        <script src="app.js"></script>
-        
-    </body>
+    </div>
 
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+
+</body>
 </html>

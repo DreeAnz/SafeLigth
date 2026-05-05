@@ -1,8 +1,7 @@
 //ponemos la direccion del bakend en una const
 console.log("corriendo app");
-
-
 const API = "http://localhost:8000"; //ruta del backend
+
 
 //crear mapa
 const map= L.map('map').setView([25.67, -100.31], 13); //L = objeto de leaflet
@@ -11,6 +10,47 @@ const map= L.map('map').setView([25.67, -100.31], 13); //L = objeto de leaflet
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'Map data'
 }).addTo(map);
+
+//el mapa aparece desde la posicion del usuario
+navigator.geolocation.getCurrentPosition(pos =>{
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    //se ponen lat y long del usuario en el mapa
+    map.setView([lat,lon],15);
+
+    L.marker([lat,lon])
+        .addTo(map)
+        .bindPopup("📍Estás aquí")
+        .openPopup();
+});
+
+
+//crear luminarias en el mapa ----------------------------------------------------
+map.on("click", async function(e) {
+    const zona = prompt("Ingresa la zona");
+    const estado = "ok";
+
+    if(!zona) return;
+
+    try{
+        await fetch(`${API}/luminarias`,{
+            method: "POST",
+            headers: {
+                "Content-type":"application/json"
+            },
+            body: json.stringify({
+                zona:zona,
+                estado:estado,
+                antiguedad:0
+            })
+        });
+        alert("Luminaria creada");
+
+        location.reload(); //recarga para ver los cambios
+    } catch(error){
+        console.error("Error al crear la luminaria",error);
+    }
+});
 
 
 //Mostrar luminarias
@@ -24,18 +64,48 @@ async function cargarLuminarias(){
         console.log(data);
 
         data.forEach(i => {
-            L.marker([25.67 + Math.random()/100, -100.31 + Math.random()/100]) 
-                .addTo(map)
-                .bindPopup(`Zona: ${i.zona}<br>Reportes: ${i.reportes}`);
+
+            const icono = L.icon({
+                iconUrl: i.reportes > 2 
+                    ? "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                    : "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                iconSize: [32, 32]
+            });
+
+            L.marker(
+                [25.67 + Math.random()/100, -100.31 + Math.random()/100],
+                { icon: icono }
+            )
+            .addTo(map)
+            .bindPopup(`Zona: ${i.zona}<br>Reportes: ${i.reportes}`);
+
         });
+
+        document.getElementById("total").textContent = "Total: " + data.length;
 
     } catch (error) {
         console.error("Error luminarias:", error);
     }
 }
+
 cargarLuminarias();
 
 
+//Cargar lista de luminarias
+async function cargarListaLuminarias(){
+    const res =await fetch(`${API}/luminarias`);
+    const data = await res.json();
+
+    const lista = document.getElementById("lista-luminarias");
+
+    data.forEach(i =>{
+        const li =document.createElement("li");
+        li.textContent = `ID:${i.id} | ${i.zona} | rep:${i.reportes} | ant:${i.antiguedad}`;
+
+        lista.appendChild(li);
+    });
+}
+cargarListaLuminarias();
 
 //Mostrar alertas
 async function cargarAlertas() {
@@ -48,6 +118,8 @@ console.log("corriendo alertas");
 
     //consigue el id "alertas"
     const lista = document.getElementById("alertas");
+
+    lista.innerHTML="";
 
     //recorre alertas
     data.forEach(a=>{
@@ -73,8 +145,6 @@ const coordenadasZonas = {
     "suroeste": [25.64, -100.33],
     "noroeste": [25.69, -100.34]
 };
-
-
 //asigna colores al nivel de riesgo
 function obtenerColor(riesgo) {
     if (riesgo === "CRITICO") return "red";
@@ -89,6 +159,7 @@ function obtenerColor(riesgo) {
 async function cargar_zonas() {
 console.log("corriendo zonas");
 
+    let criticas=0;
     try{
     //llama al backend
     const res = await fetch(`${API}/zonas`);
@@ -97,6 +168,9 @@ console.log("corriendo zonas");
     data.forEach(z =>{
         //coordenadas de las zonas
         const coordenadas = coordenadasZonas[z.zona];
+
+        if (z.riesgo === "CRITICO") criticas++;
+
 
         //si hay cordenadas las pone del color segun su riesgo
         if(coordenadas){
@@ -119,6 +193,8 @@ console.log("corriendo zonas");
                 `);
         }
     });
+    document.getElementById("zonas").textContent = "Zonas críticas: " + criticas;
+
     }
     catch (error) {
         console.error("Error zonas:", error);
